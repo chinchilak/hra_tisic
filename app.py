@@ -60,25 +60,23 @@ if 'input_value' not in st.session_state:
 #         for index in range(players):
 #             st.session_state[f"player{index}"] = 0
 
-ival1, spacer, ival2 = st.columns([4,0.25,4])
+ival1, spacer, ival2 = st.columns([3,0.25,4])
 value = ival1.text_input("Value", key="input_value")
 
 
-col1, col2, col3, col4, spacer, col5 = st.columns([1,1,1,1,0.25,4])
+col1, col2, col3, spacer, col5 = st.columns([1,1,1,0.25,4])
 
 for i in [1,2,3,4,5,6,7,8,9,0,"DEL","CLEAR"]:
-    if i in [1,5,9]:
+    if i in [1,4,7,0]:
         col1.button(str(i), key=f"button_{i}", on_click=update_input, args=(str(i)), use_container_width=True)
-    elif i in [2,6,0]:
+    elif i in [2,5,8]:
         col2.button(str(i), key=f"button_{i}", on_click=update_input, args=(str(i)), use_container_width=True)
     elif i == "DEL":
-        col3.button(i, key="button_DEL", on_click=delete_last, use_container_width=True)
+        col2.button(i, key="button_DEL", on_click=delete_last, use_container_width=True)
     elif i == "CLEAR":
-        col4.button(i, key="button_CLEAR", on_click=clear_all, use_container_width=True)
-    elif i in [3,7,0]:
-        col3.button(str(i), key=f"button_{i}", on_click=update_input, args=(str(i)), use_container_width=True)    
-    elif i in [4,8]:
-        col4.button(str(i), key=f"button_{i}", on_click=update_input, args=(str(i)), use_container_width=True)
+        col3.button(i, key="button_CLEAR", on_click=clear_all, use_container_width=True)
+    elif i in [3,6,9]:
+        col3.button(str(i), key=f"button_{i}", on_click=update_input, args=(str(i)), use_container_width=True)
 
 with col5.container():
     players = st.slider("Player count", 1, 5, 2)
