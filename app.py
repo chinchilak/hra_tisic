@@ -50,16 +50,6 @@ if 'input_value' not in st.session_state:
     st.session_state.input_value = str(0)
 
 
-# with st.sidebar:
-#     st.header("Dice Rolls")
-#     players = st.slider("Player count", 1, 5, 2)
-#     if st.button("Reset Data"):
-#         st.session_state.running_totals = {}
-#         st.session_state.additions_history = {}
-#         st.session_state.input_value = "0"
-#         for index in range(players):
-#             st.session_state[f"player{index}"] = 0
-
 ival1, spacer, ival2 = st.columns([3,0.25,4])
 value = ival1.text_input("Value", key="input_value")
 
@@ -123,7 +113,6 @@ for index, player, column in zip(player_ids, range(1, players + 1), columns):
 df = pd.DataFrame.from_dict(st.session_state.additions_history, orient='index').T
 if not df.empty:
     df.index = df.index + 1
-    # df.rename(columns=lambda x: x.replace('additions_history', 'Player '), inplace=True)
     pids = [pid + 1 for pid in player_ids]
     plys = ["Player "] * len(pids)
     cols = [f"{player}{pid}" for player, pid in zip(plys, pids)]
@@ -133,31 +122,28 @@ if not df.empty:
 else:
     df_melted = pd.DataFrame()
 
-# Create a line chart using Altair
 line_chart = alt.Chart(df_melted).mark_line().encode(
-    x=alt.X('index:O', axis=alt.Axis(title='Kolo', labelAngle=0), scale=alt.Scale(padding=0.05)),  # Rotate x-axis labels to 0 degrees
+    x=alt.X('index:O', axis=alt.Axis(title='Kolo', labelAngle=0), scale=alt.Scale(padding=0.05)),
     y=alt.Y('value:Q', axis=alt.Axis(title='Hodnota'), scale=alt.Scale(padding=0.05)),
     color=alt.Color('group:N', legend=alt.Legend(title='Hráči')))
 
-# Add colored dots for each point
 points = line_chart.mark_point(
     filled=True,
-    size=100  # Set the size of the dots
+    size=100
 ).encode(
     x='index:O',
     y='value:Q',
-    color=alt.Color('group:N', legend=None)  # Disable legend for the dots
+    color=alt.Color('group:N', legend=None)
 )
 
-# Add labels for each point
 text = line_chart.mark_text(
     align='center',
     baseline='bottom',
-    dy=-10,  # Offset label position upwards
-    fontSize=18,  # Set font size to 12
-    fontWeight='bold'  # Set font weight to bold
+    dy=-10,
+    fontSize=18,
+    fontWeight='bold'
 ).encode(
-    text='value:Q'  # Use 'value' column for the label text
+    text='value:Q'
 )
 
 chart_with_elements = (line_chart + points + text).configure_axis(grid=False).configure_legend(orient='right')
