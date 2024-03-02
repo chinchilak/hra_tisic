@@ -23,9 +23,9 @@ PLAYER = "Player"
 #         st.session_state.input_value = "0"
 #     update_result()
 
-def clear_all():
-    st.session_state.input_value = 0
-    # update_result()
+# def clear_all():
+#     st.session_state.input_value = 0
+#     update_result()
 
 # def update_result():
 #     try:
