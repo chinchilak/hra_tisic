@@ -1,42 +1,44 @@
 import streamlit as st
 import altair as alt
 import pandas as pd
+import sqlite3
+from datetime import datetime
+from pages.database import save_game, DB_NAME
 
 PLAYER = "Player"
 
-def update_input(value):
-    current_value = st.session_state.input_value
-    if current_value == "0":
-        st.session_state.input_value = value
-    else:
-        st.session_state.input_value += value
-    update_result()
+# def update_input(value):
+#     current_value = st.session_state.input_value
+#     if current_value == "0":
+#         st.session_state.input_value = value
+#     else:
+#         st.session_state.input_value += value
+#     update_result()
 
-def delete_last():
-    current_value = st.session_state.input_value
-    if len(current_value) > 1:
-        st.session_state.input_value = current_value[:-1]
-    else:
-        st.session_state.input_value = "0"
-    update_result()
+# def delete_last():
+#     current_value = st.session_state.input_value
+#     if len(current_value) > 1:
+#         st.session_state.input_value = current_value[:-1]
+#     else:
+#         st.session_state.input_value = "0"
+#     update_result()
 
 def clear_all():
-    st.session_state.input_value = "0"
-    update_result()
+    st.session_state.input_value = 0
+    # update_result()
 
-def update_result():
-    try:
-        st.session_state.result = str(eval(st.session_state.input_value))
-    except:
-        st.session_state.result = "Error"
+# def update_result():
+#     try:
+#         st.session_state.result = str(eval(st.session_state.input_value))
+#     except:
+#         st.session_state.result = "Error"
 
 def add_amount(index, value):
     original_value = st.session_state.running_totals[f"player{index}"]
     updated_value = original_value + int(value)
     st.session_state.running_totals[f"player{index}"] = updated_value
     st.session_state.additions_history[f"additions_history{index}"].append(int(value))
-    st.session_state.input_value = "0"
-
+    st.session_state.input_value = 0
 
 st.set_page_config(layout="wide", initial_sidebar_state="collapsed")
 
@@ -47,35 +49,38 @@ if 'additions_history' not in st.session_state:
     st.session_state.additions_history = {}
 
 if 'input_value' not in st.session_state:
-    st.session_state.input_value = str(0)
+    st.session_state.input_value = 0
 
-
-ival1, spacer, ival2 = st.columns([3,0.25,4])
-value = ival1.text_input("Value", key="input_value")
-
-
-col1, col2, col3, spacer, col5 = st.columns([1,1,1,0.25,4])
-
-for i in [1,2,3,4,5,6,7,8,9,0,"DEL","CLEAR"]:
-    if i in [1,4,7,0]:
-        col1.button(str(i), key=f"button_{i}", on_click=update_input, args=(str(i)), use_container_width=True)
-    elif i in [2,5,8]:
-        col2.button(str(i), key=f"button_{i}", on_click=update_input, args=(str(i)), use_container_width=True)
-    elif i == "DEL":
-        col2.button(i, key="button_DEL", on_click=delete_last, use_container_width=True)
-    elif i == "CLEAR":
-        col3.button(i, key="button_CLEAR", on_click=clear_all, use_container_width=True)
-    elif i in [3,6,9]:
-        col3.button(str(i), key=f"button_{i}", on_click=update_input, args=(str(i)), use_container_width=True)
-
-with col5.container():
+with st.sidebar:
     players = st.slider("Player count", 1, 5, 2)
+    maximum = st.number_input("Maximum", 0, 10000, 5000, 100)
+    st.divider()
     if st.button("Reset Data"):
         st.session_state.running_totals = {}
         st.session_state.additions_history = {}
-        st.session_state.input_value = "0"
+        st.session_state.input_value = 0
         for index in range(players):
             st.session_state[f"player{index}"] = 0
+   
+
+# ival1, spacer, ival2 = st.columns([3,0.25,4])
+# value = ival1.text_input("Value", key="input_value")
+
+value = st.slider("Value", 0, maximum, step=50, key="input_value")
+
+# col1, col2, col3, spacer, col5 = st.columns([1,1,1,0.25,4])
+
+# for i in [1,2,3,4,5,6,7,8,9,0,"DEL","CLEAR"]:
+#     if i in [1,4,7,0]:
+#         col1.button(str(i), key=f"button_{i}", on_click=update_input, args=(str(i)), use_container_width=True)
+#     elif i in [2,5,8]:
+#         col2.button(str(i), key=f"button_{i}", on_click=update_input, args=(str(i)), use_container_width=True)
+#     elif i == "DEL":
+#         col2.button(i, key="button_DEL", on_click=delete_last, use_container_width=True)
+#     elif i == "CLEAR":
+#         col3.button(i, key="button_CLEAR", on_click=clear_all, use_container_width=True)
+#     elif i in [3,6,9]:
+#         col3.button(str(i), key=f"button_{i}", on_click=update_input, args=(str(i)), use_container_width=True)
 
 player_ids = [i for i in range(players)]
 running_total = [0] * players
@@ -93,7 +98,7 @@ for index, player, column in zip(player_ids, range(1, players + 1), columns):
         nm = st.text_input("Name", f"{PLAYER} {index + 1}", key=f"name{index}")
 
         c1, c2, c3, c4 = st.columns([2,1,2,2])
-        c1.button("Add", key=f"addbtn{index}", on_click=add_amount, args=(str(index),st.session_state.input_value), use_container_width=True)
+        c1.button("Add", key=f"addbtn{index}", on_click=add_amount, args=(str(index),value), use_container_width=True)
         c3.button("+350", key=f"add350{index}", on_click=add_amount, args=(str(index),350), use_container_width=True)
         c4.button("+1000", key=f"add1000{index}", on_click=add_amount, args=(str(index),1000), use_container_width=True)
 
@@ -109,6 +114,23 @@ for index, player, column in zip(player_ids, range(1, players + 1), columns):
         # st.line_chart({index: value for index, value in enumerate(st.session_state.additions_history[f'additions_history{index}'])}, use_container_width=True)
         # st.code(f"{st.session_state.additions_history[f'additions_history{index}']}")
 
+def remove_last_value(player_index):
+    history_key = f"additions_history{player_index}"
+    if "additions_history" in st.session_state:
+        if history_key in st.session_state["additions_history"]:
+            if st.session_state["additions_history"][history_key]:
+                value_removed = st.session_state["additions_history"][history_key][-1]
+                st.session_state["additions_history"][history_key].pop()
+                player_key = f"player{player_index}"
+                if player_key in st.session_state["running_totals"]:
+                    st.session_state["running_totals"][player_key] -= value_removed
+                st.sidebar.success("Last value removed successfully!")
+            else:
+                st.sidebar.error(f"No values in history for player {player_index}.")
+        else:
+            st.sidebar.error(f"No history found for player {player_index}.")
+    else:
+        st.sidebar.error("No history found in session state.")
 
 df = pd.DataFrame.from_dict(st.session_state.additions_history, orient='index').T
 if not df.empty:
@@ -148,3 +170,28 @@ text = line_chart.mark_text(
 
 chart_with_elements = (line_chart + points + text).configure_axis(grid=False).configure_legend(orient='right')
 st.altair_chart(chart_with_elements, theme="streamlit", use_container_width=True)
+
+st.write(st.session_state)
+
+with st.sidebar:
+    st.divider()
+    opts = [f"{PLAYER} {player_id + 1}" for player_id in player_ids]
+    sel = st.selectbox("Players", opts, index=True)
+    idx = opts.index(sel)
+    st.button("Remove Last Value", on_click=remove_last_value, args=(idx,))
+    st.divider()
+    if st.button("Save game"):
+        conn = sqlite3.connect(DB_NAME)
+
+        df_db = df_melted
+        formatted_datetime = datetime.now().strftime("%Y-%b-%d %H:%M")
+        df_db.insert(loc=0, column="Date", value=formatted_datetime)
+        df_db.columns = ["Date", "Round", "Player", "Value"]
+
+        try:
+            save_game(conn, df_melted)
+            st.success("Game saved")
+        except:
+            st.error("Could not save game")
+
+        conn.close()
