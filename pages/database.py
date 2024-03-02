@@ -57,7 +57,7 @@ cols = st.columns([2,8])
 
 with cols[0]:
     df = df[["Player", "Round", "Value"]]
-    
+
     sum_per_player = df.groupby("Player")["Value"].sum().reset_index()
     max_round_per_player = df.groupby("Player")["Round"].max().reset_index()
     zero_count_per_player = (df[df["Value"] == 0].groupby("Player").size()).reset_index(name="Zeroes")

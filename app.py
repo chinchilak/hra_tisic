@@ -3,9 +3,13 @@ import altair as alt
 import pandas as pd
 import sqlite3
 from datetime import datetime
-from pages.database import save_game, DB_NAME
 
 PLAYER = "Player"
+DB_NAME = "./games.db"
+TBL_NAME = "games"
+
+def save_game(conn, df):
+    df.to_sql(TBL_NAME, conn, if_exists="append", index=False)
 
 # def update_input(value):
 #     current_value = st.session_state.input_value
@@ -33,6 +37,8 @@ PLAYER = "Player"
 #     except:
 #         st.session_state.result = "Error"
 
+st.set_page_config(layout="wide", initial_sidebar_state="collapsed")
+
 def add_amount(index, value):
     original_value = st.session_state.running_totals[f"player{index}"]
     updated_value = original_value + int(value)
@@ -40,7 +46,7 @@ def add_amount(index, value):
     st.session_state.additions_history[f"additions_history{index}"].append(int(value))
     st.session_state.input_value = 0
 
-st.set_page_config(layout="wide", initial_sidebar_state="collapsed")
+
 
 if 'running_totals' not in st.session_state:
     st.session_state.running_totals = {}
