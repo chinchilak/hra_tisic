@@ -171,8 +171,6 @@ text = line_chart.mark_text(
 chart_with_elements = (line_chart + points + text).configure_axis(grid=False).configure_legend(orient='right')
 st.altair_chart(chart_with_elements, theme="streamlit", use_container_width=True)
 
-st.write(st.session_state)
-
 with st.sidebar:
     st.divider()
     opts = [f"{PLAYER} {player_id + 1}" for player_id in player_ids]

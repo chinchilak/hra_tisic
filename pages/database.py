@@ -22,6 +22,13 @@ def create_table():
                         Value INTEGER
                         )""")
 
+def delete_table_data():
+    conn = create_connection()
+    c = conn.cursor()
+    c.execute('DELETE FROM your_table')
+    conn.commit()
+    conn.close()
+
 def save_game(conn, df):
     df.to_sql(TBL_NAME, conn, if_exists="append", index=False)
 
@@ -78,6 +85,3 @@ with cols[1]:
 
     chart_with_elements = (line_chart + points + text).configure_axis(grid=False).configure_legend(orient='right')
     st.altair_chart(chart_with_elements, theme="streamlit", use_container_width=True)
-
-
-
