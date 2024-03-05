@@ -60,7 +60,7 @@ min_val = 0
 max_val = maximum
 step = 50
 
-hcols = st.columns([18,2])
+hcols = st.columns([20,1])
 
 with hcols[0]:
     st.write(generate_tick_marks_1(min_val, max_val, step_hash), unsafe_allow_html=True)
@@ -68,9 +68,8 @@ with hcols[0]:
     st.write("")
     value = st.slider("inputvalue", min_val, max_val, min_val, step, format="%d", label_visibility="collapsed")
 with hcols[1]:
-    st.markdown(f"<div style='text-align: center; vertical-align: bottom; font-size: larger;font-weight:bold;color:#090'>{value}</div>", unsafe_allow_html=True)
+    st.markdown(f"<div style='text-align: center; vertical-align: bottom; font-size: 24pt;font-weight:bold;color:#aaa'>{value}</div>", unsafe_allow_html=True)
 
-# value = st.slider("Value", 0, maximum, step=50, key="input_value")
 
 player_ids = [i for i in range(players)]
 running_total = [0] * players
