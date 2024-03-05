@@ -8,36 +8,11 @@ PLAYER = "Player"
 DB_NAME = "./games.db"
 TBL_NAME = "games"
 
-def save_game(conn, df):
-    df.to_sql(TBL_NAME, conn, if_exists="append", index=False)
-
-# def update_input(value):
-#     current_value = st.session_state.input_value
-#     if current_value == "0":
-#         st.session_state.input_value = value
-#     else:
-#         st.session_state.input_value += value
-#     update_result()
-
-# def delete_last():
-#     current_value = st.session_state.input_value
-#     if len(current_value) > 1:
-#         st.session_state.input_value = current_value[:-1]
-#     else:
-#         st.session_state.input_value = "0"
-#     update_result()
-
-# def clear_all():
-#     st.session_state.input_value = 0
-#     update_result()
-
-# def update_result():
-#     try:
-#         st.session_state.result = str(eval(st.session_state.input_value))
-#     except:
-#         st.session_state.result = "Error"
 
 st.set_page_config(layout="wide", initial_sidebar_state="collapsed")
+
+def save_game(conn, df):
+    df.to_sql(TBL_NAME, conn, if_exists="append", index=False)
 
 def add_amount(index, value):
     original_value = st.session_state.running_totals[f"player{index}"]
@@ -47,6 +22,17 @@ def add_amount(index, value):
     st.session_state.input_value = 0
 
 
+def generate_tick_marks_1(min_val, max_val, step_hash):
+    marks = ""
+    for i in range(min_val + step_hash, max_val, step_hash):
+        marks += f"<span style='position:absolute;left:{i / max_val * 100}%;top:25%;transform:translateY(-50%) translateX(-50%) rotate(-90deg);color:#888;font-size:12pt;'>{i}</span>"
+    return marks
+
+def generate_tick_marks_2(min_val, max_val, step_hash):
+    marks = ""
+    for i in range(min_val, max_val + step_hash, step_hash):
+        marks += f"<span style='position:absolute;left:{i / max_val * 100}%;top:75%;width:1px;height:10px;background-color:#888;transform:translateX(-50%);'></span>"
+    return marks
 
 if 'running_totals' not in st.session_state:
     st.session_state.running_totals = {}
@@ -57,9 +43,11 @@ if 'additions_history' not in st.session_state:
 if 'input_value' not in st.session_state:
     st.session_state.input_value = 0
 
+
 with st.sidebar:
     players = st.slider("Player count", 1, 5, 2)
-    maximum = st.number_input("Maximum", 0, 10000, 5000, 100)
+    maximum = st.number_input("Maximum", 0, 10000, 3000, 500)
+    step_hash = st.number_input("Hashmarks", 0, 10000, 100, 50)
     st.divider()
     if st.button("Reset Data"):
         st.session_state.running_totals = {}
@@ -68,25 +56,21 @@ with st.sidebar:
         for index in range(players):
             st.session_state[f"player{index}"] = 0
    
+min_val = 0
+max_val = maximum
+step = 50
 
-# ival1, spacer, ival2 = st.columns([3,0.25,4])
-# value = ival1.text_input("Value", key="input_value")
+hcols = st.columns([18,2])
 
-value = st.slider("Value", 0, maximum, step=50, key="input_value")
+with hcols[0]:
+    st.write(generate_tick_marks_1(min_val, max_val, step_hash), unsafe_allow_html=True)
+    st.write(generate_tick_marks_2(min_val, max_val, step_hash), unsafe_allow_html=True)
+    st.write("")
+    value = st.slider("inputvalue", min_val, max_val, min_val, step, format="%d", label_visibility="collapsed")
+with hcols[1]:
+    st.markdown(f"<div style='text-align: center; vertical-align: bottom; font-size: larger;font-weight:bold;color:#090'>{value}</div>", unsafe_allow_html=True)
 
-# col1, col2, col3, spacer, col5 = st.columns([1,1,1,0.25,4])
-
-# for i in [1,2,3,4,5,6,7,8,9,0,"DEL","CLEAR"]:
-#     if i in [1,4,7,0]:
-#         col1.button(str(i), key=f"button_{i}", on_click=update_input, args=(str(i)), use_container_width=True)
-#     elif i in [2,5,8]:
-#         col2.button(str(i), key=f"button_{i}", on_click=update_input, args=(str(i)), use_container_width=True)
-#     elif i == "DEL":
-#         col2.button(i, key="button_DEL", on_click=delete_last, use_container_width=True)
-#     elif i == "CLEAR":
-#         col3.button(i, key="button_CLEAR", on_click=clear_all, use_container_width=True)
-#     elif i in [3,6,9]:
-#         col3.button(str(i), key=f"button_{i}", on_click=update_input, args=(str(i)), use_container_width=True)
+# value = st.slider("Value", 0, maximum, step=50, key="input_value")
 
 player_ids = [i for i in range(players)]
 running_total = [0] * players
@@ -117,8 +101,6 @@ for index, player, column in zip(player_ids, range(1, players + 1), columns):
             c4.markdown(f"#### Top: :orange[{max(st.session_state.additions_history.get(f'additions_history{index}', []), default=None)}]")
         except:
             pass
-        # st.line_chart({index: value for index, value in enumerate(st.session_state.additions_history[f'additions_history{index}'])}, use_container_width=True)
-        # st.code(f"{st.session_state.additions_history[f'additions_history{index}']}")
 
 def remove_last_value(player_index):
     history_key = f"additions_history{player_index}"
