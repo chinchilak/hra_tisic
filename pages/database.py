@@ -25,7 +25,7 @@ def create_table():
 def delete_table_data():
     conn = create_connection()
     c = conn.cursor()
-    c.execute('DELETE FROM your_table')
+    c.execute(f"DELETE FROM {TBL_NAME}")
     conn.commit()
     conn.close()
 
@@ -98,5 +98,3 @@ with cols[1]:
 
     chart_with_elements = (line_chart + points + text).configure_axis(grid=False).configure_legend(orient='right')
     st.altair_chart(chart_with_elements, theme="streamlit", use_container_width=True)
-
-
