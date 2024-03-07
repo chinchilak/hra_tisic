@@ -34,6 +34,25 @@ def generate_tick_marks_2(min_val, max_val, step_hash):
         marks += f"<span style='position:absolute;left:{i / max_val * 100}%;top:75%;width:1px;height:10px;background-color:#888;transform:translateX(-50%);'></span>"
     return marks
 
+def remove_last_value(player_index):
+    history_key = f"additions_history{player_index}"
+    if "additions_history" in st.session_state:
+        if history_key in st.session_state["additions_history"]:
+            if st.session_state["additions_history"][history_key]:
+                value_removed = st.session_state["additions_history"][history_key][-1]
+                st.session_state["additions_history"][history_key].pop()
+                player_key = f"player{player_index}"
+                if player_key in st.session_state["running_totals"]:
+                    st.session_state["running_totals"][player_key] -= value_removed
+                st.sidebar.success("Last value removed successfully!")
+            else:
+                st.sidebar.error(f"No values in history for player {player_index}.")
+        else:
+            st.sidebar.error(f"No history found for player {player_index}.")
+    else:
+        st.sidebar.error("No history found in session state.")
+
+
 if 'running_totals' not in st.session_state:
     st.session_state.running_totals = {}
 
@@ -66,7 +85,7 @@ with hcols[0]:
     st.write(generate_tick_marks_1(min_val, max_val, step_hash), unsafe_allow_html=True)
     st.write(generate_tick_marks_2(min_val, max_val, step_hash), unsafe_allow_html=True)
     st.write("")
-    value = st.slider("inputvalue", min_val, max_val, min_val, step, format="%d", label_visibility="collapsed")
+    value = st.slider("inputvalue", min_val, max_val, step=step, format="%d", label_visibility="collapsed", key="input_value")
 with hcols[1]:
     st.markdown(f"<div style='text-align: center; vertical-align: bottom; font-size: 24pt;font-weight:bold;color:#aaa'>{value}</div>", unsafe_allow_html=True)
 
@@ -101,23 +120,6 @@ for index, player, column in zip(player_ids, range(1, players + 1), columns):
         except:
             pass
 
-def remove_last_value(player_index):
-    history_key = f"additions_history{player_index}"
-    if "additions_history" in st.session_state:
-        if history_key in st.session_state["additions_history"]:
-            if st.session_state["additions_history"][history_key]:
-                value_removed = st.session_state["additions_history"][history_key][-1]
-                st.session_state["additions_history"][history_key].pop()
-                player_key = f"player{player_index}"
-                if player_key in st.session_state["running_totals"]:
-                    st.session_state["running_totals"][player_key] -= value_removed
-                st.sidebar.success("Last value removed successfully!")
-            else:
-                st.sidebar.error(f"No values in history for player {player_index}.")
-        else:
-            st.sidebar.error(f"No history found for player {player_index}.")
-    else:
-        st.sidebar.error("No history found in session state.")
 
 df = pd.DataFrame.from_dict(st.session_state.additions_history, orient='index').T
 if not df.empty:
