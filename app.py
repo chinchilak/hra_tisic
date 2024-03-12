@@ -74,20 +74,26 @@ with st.sidebar:
         st.session_state.input_value = 0
         for index in range(players):
             st.session_state[f"player{index}"] = 0
-   
+
 min_val = 0
 max_val = maximum
 step = 50
 
-hcols = st.columns([20,1])
+st.markdown("""
+    <style>
+    .StyledThumbValue {
+        font-size: 18pt;
+        top: -120px;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
-with hcols[0]:
-    st.write(generate_tick_marks_1(min_val, max_val, step_hash), unsafe_allow_html=True)
-    st.write(generate_tick_marks_2(min_val, max_val, step_hash), unsafe_allow_html=True)
-    st.write("")
-    value = st.slider("inputvalue", min_val, max_val, step=step, format="%d", label_visibility="collapsed", key="input_value")
-with hcols[1]:
-    st.markdown(f"<div style='text-align: center; vertical-align: bottom; font-size: 24pt;font-weight:bold;color:#aaa'>{value}</div>", unsafe_allow_html=True)
+
+st.write(generate_tick_marks_1(min_val, max_val, step_hash), unsafe_allow_html=True)
+st.write(generate_tick_marks_2(min_val, max_val, step_hash), unsafe_allow_html=True)
+st.write("")
+value = st.slider("inputvalue", min_val, max_val, step=step, format="%d", label_visibility="collapsed", key="input_value")
+
 
 
 player_ids = [i for i in range(players)]
@@ -103,20 +109,22 @@ for index, player, column in zip(player_ids, range(1, players + 1), columns):
         st.session_state.additions_history[f"additions_history{index}"] = []
     
     with column:
-        nm = st.text_input("Name", f"{PLAYER} {index + 1}", key=f"name{index}")
+        colsg = st.columns([2,0.5,1,0.5,2,2])
+        
+        nm = colsg[0].text_input("Name", f"{PLAYER} {index + 1}", key=f"name{index}", label_visibility="collapsed")
 
-        c1, c2, c3, c4 = st.columns([2,1,2,2])
-        c1.button("Add", key=f"addbtn{index}", on_click=add_amount, args=(str(index),value), use_container_width=True)
-        c3.button("+350", key=f"add350{index}", on_click=add_amount, args=(str(index),350), use_container_width=True)
-        c4.button("+1000", key=f"add1000{index}", on_click=add_amount, args=(str(index),1000), use_container_width=True)
+        # c1, c2, c3, c4 = st.columns([2,1,2,2])
+        colsg[2].button("Add", key=f"addbtn{index}", on_click=add_amount, args=(str(index),value), use_container_width=True)
+        colsg[4].button("+350", key=f"add350{index}", on_click=add_amount, args=(str(index),350), use_container_width=True)
+        colsg[5].button("+1000", key=f"add1000{index}", on_click=add_amount, args=(str(index),1000), use_container_width=True)
 
-        c1.markdown(f"### Score: :green[{st.session_state.running_totals[f'player{index}']}] / :red[{10_000 - int(st.session_state.running_totals[f'player{index}'])}]")
+        colsg[0].markdown(f"### Score: :green[{st.session_state.running_totals[f'player{index}']}] / :red[{10_000 - int(st.session_state.running_totals[f'player{index}'])}]")
         try:
-            c3.markdown(f"#### Zero: :orange[{st.session_state.additions_history.get(f'additions_history{index}', []).count(0)}]  (:gray[{(st.session_state.additions_history.get(f'additions_history{index}', []).count(0))/len(st.session_state.additions_history.get(f'additions_history{index}')):.2%}])")
+            colsg[4].markdown(f"#### Zero: :orange[{st.session_state.additions_history.get(f'additions_history{index}', []).count(0)}]  (:gray[{(st.session_state.additions_history.get(f'additions_history{index}', []).count(0))/len(st.session_state.additions_history.get(f'additions_history{index}')):.2%}])")
         except:
             pass
         try:
-            c4.markdown(f"#### Top: :orange[{max(st.session_state.additions_history.get(f'additions_history{index}', []), default=None)}]")
+            colsg[5].markdown(f"#### Top: :orange[{max(st.session_state.additions_history.get(f'additions_history{index}', []), default=None)}]")
         except:
             pass
 
