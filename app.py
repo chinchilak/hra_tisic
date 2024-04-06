@@ -64,7 +64,7 @@ if 'input_value' not in st.session_state:
 
 
 with st.sidebar:
-    players = st.slider("Player count", 1, 5, 2)
+    players = st.number_input("Player count", 1, 6, 2, 1)
     maximum = st.number_input("Maximum", 0, 10000, 3000, 500)
     step_hash = st.number_input("Hashmarks", 0, 10000, 100, 50)
     st.divider()
@@ -109,22 +109,25 @@ for index, player, column in zip(player_ids, range(1, players + 1), columns):
         st.session_state.additions_history[f"additions_history{index}"] = []
     
     with column:
-        colsg = st.columns([2,0.5,1,0.5,2,2])
+        colsg = st.columns([2,0.25,2,0.25,2,2])
         
         nm = colsg[0].text_input("Name", f"{PLAYER} {index + 1}", key=f"name{index}", label_visibility="collapsed")
 
-        # c1, c2, c3, c4 = st.columns([2,1,2,2])
         colsg[2].button("Add", key=f"addbtn{index}", on_click=add_amount, args=(str(index),value), use_container_width=True)
         colsg[4].button("+350", key=f"add350{index}", on_click=add_amount, args=(str(index),350), use_container_width=True)
         colsg[5].button("+1000", key=f"add1000{index}", on_click=add_amount, args=(str(index),1000), use_container_width=True)
 
         colsg[0].markdown(f"### Score: :green[{st.session_state.running_totals[f'player{index}']}] / :red[{10_000 - int(st.session_state.running_totals[f'player{index}'])}]")
         try:
-            colsg[4].markdown(f"#### Zero: :orange[{st.session_state.additions_history.get(f'additions_history{index}', []).count(0)}]  (:gray[{(st.session_state.additions_history.get(f'additions_history{index}', []).count(0))/len(st.session_state.additions_history.get(f'additions_history{index}')):.2%}])")
+            colsg[2].markdown(f"#### Average: :blue[{st.session_state.running_totals[f'player{index}'] / len(st.session_state.additions_history.get(f'additions_history{index}')):.1f}]")
         except:
             pass
         try:
-            colsg[5].markdown(f"#### Top: :orange[{max(st.session_state.additions_history.get(f'additions_history{index}', []), default=None)}]")
+            colsg[4].markdown(f"#### Zero: :orange[{st.session_state.additions_history.get(f'additions_history{index}', []).count(0)}]  (:gray[{(st.session_state.additions_history.get(f'additions_history{index}', []).count(0)) / len(st.session_state.additions_history.get(f'additions_history{index}')):.2%}])")
+        except:
+            pass
+        try:
+            colsg[5].markdown(f"#### Top: :violet[{max(st.session_state.additions_history.get(f'additions_history{index}', []), default=None)}]")
         except:
             pass
 
@@ -168,12 +171,12 @@ text = line_chart.mark_text(
 chart_with_elements = (line_chart + points + text).configure_axis(grid=False).configure_legend(orient='right')
 st.altair_chart(chart_with_elements, theme="streamlit", use_container_width=True)
 
+
 with st.sidebar:
     st.divider()
     opts = [f"{PLAYER} {player_id + 1}" for player_id in player_ids]
-    sel = st.selectbox("Players", opts, index=True)
-    idx = opts.index(sel)
-    st.button("Remove Last Value", on_click=remove_last_value, args=(idx,))
+    for idx, p in enumerate(opts):
+        st.button(f"Remove Last Value for {p}", on_click=remove_last_value, args=(idx,), key=f"plyr{p}")
     st.divider()
     if st.button("Save game"):
         conn = sqlite3.connect(DB_NAME)
